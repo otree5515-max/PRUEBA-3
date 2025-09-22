@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Olive Tree</title>
+    <style>
+        /* AJUSTES PARA LA IMPRESIÓN */
+        
+        @page {
+            size: letter;
+            margin: 0;
+        }
+        /* Estilos generales para todo el cuerpo */
+        
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+            text-align: center;
+        }
+        /* Título de la página */
+        
+        h1 {
+            color: #ffc107;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        /* Contenedor principal para formularios y selector */
+        
+        .container {
+            background-color: #2a2a2a;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+        /* Estilo de los botones principales y selector de días */
+        
+        .boton-amarillo {
+            background-color: #ffc107;
+            color: #1a1a1a;
+            padding: 15px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.2s;
+            white-space: nowrap;
+        }
+        
+        .boton-amarillo:hover {
+            background-color: #ffad33;
+            transform: translateY(-2px);
+        }
+        
+        .boton-amarillo.active {
+            background-color: #ffc107;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5);
+        }
+        /* Estilo para los botones de acción (Entrar, Registrarse) */
+        
+        .boton-rojo {
+            background-color: #e63946;
+            color: #fff;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .boton-rojo:hover {
+            background-color: #c92f39;
+        }
+        /* Estilo para el botón de "Volver" */
+        
+        .boton-volver {
+            background: none;
+            color: #ffc107;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .boton-volver:hover {
+            text-decoration: underline;
+        }
+        /* Estilo de los formularios */
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        h2 {
+            color: #e0e0e0;
+            font-size: 1.5em;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        /* Mensajes de error y éxito */
+        
+        .mensaje {
+            margin-top: -10px;
+            font-size: 0.9em;
+            color: #ffc107;
+        }
+        
+        .error {
+            color: #f44336;
+        }
+        /* Ocultar elementos por defecto */
+        
+        .hidden {
+            display: none !important;
+        }
+        /* Estilos del fondo animado */
+        
+        .bg {
+            animation: slide 3s ease-in-out infinite alternate;
+            background-image: linear-gradient(-60deg, #1a1a1a 50%, #2a2a2a 50%);
+            bottom: 0;
+            left: -50%;
+            opacity: 0.5;
+            position: fixed;
+            right: -50%;
+            top: 0;
+            z-index: -1;
+        }
+        
+        .bg2 {
+            animation-direction: alternate-reverse;
+            animation-duration: 4s;
+        }
+        
+        .bg3 {
+            animation-duration: 5s;
+        }
+        
+        @keyframes slide {
+            0% {
+                transform: translateX(-25%);
+            }
+            100% {
+                transform: translateX(25%);
+            }
+        }
+        /* Contenedor de la vista de días */
+        
+        #dias-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            z-index: 10;
+        }
+        /* Contenedor de los botones de los días */
+        
+        .dias-header,
+        .niveles-header {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            justify-content: center;
+            width: fit-content;
+        }
+        /* Mensaje de selección y contenido del día */
+        
+        .contenido-central {
+            background-color: #2a2a2a;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 500px;
+            max-width: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .contenido-central h3 {
+            margin: 0;
+        }
+        /* Estilo para el mensaje de selección de día */
+        
+        .selecciona-dia-container h3 {
+            font-size: 1.5em;
+        }
+        /* Contenido del día seleccionado */
+        
+        .contenido-dia h3 {
+            color: #ffc107;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        .contenido-dia p {
+            color: #e0e0e0;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        
+        .print-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            /* Permite que los botones se ajusten en varias líneas */
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .print-button {
+            background-color: #444;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .print-button:hover {
+            background-color: #555;
+            border-color: #666;
+        }
+        
+        .print-button::before {
+            content: '🖨️';
+            font-size: 1.2em;
+        }
+        /* ESTILOS DE LA VENTANA EMERGENTE (MODAL) */
+        
+        #image-modal {
+            display: none;
+            /* Oculto por defecto */
+            position: fixed;
+            z-index: 100;
+            /* Asegura que esté sobre todo lo demás */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+        
+        .modal-content button {
+            margin-top: 10px;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: #ffc107;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-button:hover,
+        .close-button:focus {
+            color: #ffad33;
+            text-decoration: none;
+        }
+        /* Estilos para el contenido de impresión */
+        
+        @media print {
+            /* Oculta todo el contenido de la página excepto el modal */
+            body>*:not(#image-modal) {
+                display: none !important;
+            }
+            #image-modal {
+                display: block;
+                position: static;
+                width: auto;
+                height: auto;
+                background: none;
+                padding: 0;
+            }
+            .modal-content {
+                box-shadow: none;
+                max-width: 100%;
+                max-height: none;
+                padding: 0;
+            }
+            /* Oculta el título al imprimir */
+            .modal-content h3 {
+                display: none !important;
+            }
+            .modal-content button,
+            .close-button {
+                display: none !important;
+            }
+            .modal-images-container img {
+                width: 100%;
+                height: auto;
+                /* Esta es la solución: fuerza un salto de página después de cada imagen */
+                page-break-after: always;
+                /* Se elimina el margen inferior para evitar hojas en blanco innecesarias */
+                margin-bottom: 0 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="main-content">
+        <h1>Olive Tree</h1>
+
+        <div class="container" id="selector">
+            <button class="boton-amarillo" id="btn-login">Iniciar Sesión</button>
+            <button class="boton-amarillo" id="btn-register">Registrarse</button>
+        </div>
+
+        <div class="container hidden" id="forms">
+            <form id="login-form">
+                <h2>Iniciar Sesión</h2>
+                <input type="text" id="loginUsuario" placeholder="Usuario" required />
+                <input type="password" id="loginPassword" placeholder="Contraseña" required />
+                <button type="submit" class="boton-rojo" id="btn-entrar">Entrar</button>
+                <button type="button" class="boton-volver" id="back-login">Volver</button>
+                <p id="loginMensaje" class="mensaje"></p>
+            </form>
+            <form action="https://formspree.io/f/xovkawbw" method="POST" id="register-form">
+                <label for="registerName">Nombre:</label>
+                <input type="text" id="registerName" name="Nombre" required>
+
+                <label for="registerApellidos">Apellidos:</label>
+                <input type="text" id="registerApellidos" name="Apellidos" required>
+
+                <label for="registerUsuario">Usuario:</label>
+                <input type="text" id="registerUsuario" name="Usuario" required>
+
+                <label for="registerEmail">Correo:</label>
+                <input type="email" id="registerEmail" name="Correo" required>
+
+                <label for="registerPassword">Contraseña:</label>
+                <input type="password" id="registerPassword" name="Contraseña" required>
+
+                <input type="hidden" name="_next" value="https://otree5515-max.github.io/Olivetree.q1/">
+
+                <button type="submit" class="submit-button">Registrarse</button>
+
+                <button type="button" class="volver-button" id="back-register">Volver</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dias-view" class="hidden">
+        <h1>Elige un Nivel</h1>
+        <div class="niveles-header">
+            <button class="boton-amarillo nivel-btn" data-nivel="1">Nivel 1</button>
+            <button class="boton-amarillo nivel-btn" data-nivel="2">Nivel 2</button>
+            <button class="boton-amarillo nivel-btn" data-nivel="3">Nivel 3</button>
+        </div>
+
+        <div id="dias-container" class="hidden">
+            <h1></h1>
+            <div class="dias-header">
+                <button class="boton-amarillo" data-dia="Lunes">Lunes</button>
+                <button class="boton-amarillo" data-dia="Martes">Martes</button>
+                <button class="boton-amarillo" data-dia="Miércoles">Miércoles</button>
+                <button class="boton-amarillo" data-dia="Jueves">Jueves</button>
+                <button class="boton-amarillo" data-dia="Viernes">Viernes</button>
+            </div>
+
+            <div id="contenido-central-wrapper">
+                <div class="contenido-central" id="selecciona-dia-mensaje">
+                    <h3>Seleccione el día de la semana correspondiente.</h3>
+                </div>
+
+                <div class="contenido-central hidden" id="contenido-dia-display">
+                    <h3 id="dia-titulo"></h3>
+                    <p id="dia-texto"></p>
+                    <div class="print-buttons" id="print-buttons-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="boton-volver" id="back-dias">Volver</button>
+    </div>
+
+    <div id="image-modal">
+        <span class="close-button">&times;</span>
+        <div class="modal-content">
+            <h3 id="modal-title"></h3>
+            <div class="modal-images-container"></div>
+            <button class="boton-amarillo" id="print-modal-button">🖨️ Imprimir</button>
+        </div>
+    </div>
+
+    <div class="bg"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
+
+    <script>
+        let selectedLevel = null; // Variable para almacenar el nivel seleccionado
+
+        const contenidoPorNivel = {
+            "1": {
+                "Lunes": {
+                    titulo: "Lunes",
+                    texto: "TAREAS DEL DIA LUNES.",
+                    gruposDeImagenes: [
+                        ['https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20A1%20(1).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20A1%20(2).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20A1%20(3).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20A1%20(4).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(14).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(15).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(16).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(17).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(18).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(19).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(27).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(28).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(29).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(30).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(31).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(32).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(33).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(34).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(35).jpg', 'https://raw.githubusercontent.com/otree5515-max/Olivetree./main/impresiones/imagenes1/MATH%20E1%20(36).jpg']
+                    ]
+                },
+                "Martes": {
+                    titulo: "Martes",
+                    texto: "TAREAS DEL DIA MARTES.",
+                    gruposDeImagenes: [
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(1).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(16).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(17).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(18).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(2).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(21).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(22).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(23).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(24).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(25).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(26).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(3).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(4).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(5).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(6).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E2%20(7).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E3%20(8).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E3%20(9).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E3%20(1).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes2/MATH%20E3%20(10).jpg']
+                    ]
+                },
+                "Miércoles": {
+                    titulo: "Miércoles",
+                    texto: "TAREAS DEL DIA MIERCOLES.",
+                    gruposDeImagenes: [
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(11).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(19).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(20).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(21).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(22).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(23).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(24).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(25).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(26).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(27).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(28).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(3).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(4).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(5).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(6).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(7).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(8).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes3/MATH%20E3%20(9).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(1).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(10).jpg']
+                    ]
+                },
+                "Jueves": {
+                    titulo: "Jueves",
+                    texto: "TAREAS DEL DIA JUEVES.",
+                    gruposDeImagenes: [
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(16).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(17).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(18).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(19).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(2).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(20).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(21).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(22).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(23).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(24).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(25).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(3).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(4).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(5).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(6).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(7).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(4).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(5).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(6).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(7).jpg']
+                    ]
+                },
+                "Viernes": {
+                    titulo: "Viernes",
+                    texto: "TAREAS DEL DIA VIERNES.",
+                    gruposDeImagenes: [
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes4/MATH%20E4%20(8).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(1).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(10).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(17).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(18).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(19).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(2).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(20).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(21).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(22).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(23).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(24).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(25).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(26).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(3).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(4).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(5).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(6).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(7).jpg', 'https://raw.githubusercontent.com/otree5515-max/imagenes/refs/heads/main/imagenes5/MATH%20E5%20(8).jpg']
+                    ]
+                }
+            },
+            "2": {
+                "Lunes": {
+                    titulo: "Lunes",
+                    texto: "TAREAS DEL DIA LUNES.",
+                    gruposDeImagenes: [
+                        ['https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(103).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(102).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(101).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(10).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(11).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(108).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(105).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(104).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(12).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(13).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(14).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(15).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(19).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(18).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(17).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(16).jpg'],
+                        ['https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(23).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(22).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(21).jpg', 'https://raw.githubusercontent.com/otree5515-max/-2-imagenes/refs/heads/main/MATHF1CORTADAS/MATH%20F1%20(20).jpg']
+                    ]
+                },
+                "Martes": {
+                    titulo: "Martes",
+                    texto: "TAREAS DEL DIA MARTES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Miércoles": {
+                    titulo: "Miércoles",
+                    texto: "TAREAS DEL DIA MIERCOLES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Jueves": {
+                    titulo: "Jueves",
+                    texto: "TAREAS DEL DIA JUEVES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Viernes": {
+                    titulo: "Viernes",
+                    texto: "TAREAS DEL DIA VIERNES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                }
+            },
+            "3": {
+                "Lunes": {
+                    titulo: "Lunes",
+                    texto: "TAREAS DEL DIA LUNES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Martes": {
+                    titulo: "Martes",
+                    texto: "TAREAS DEL DIA MARTES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Miércoles": {
+                    titulo: "Miércoles",
+                    texto: "TAREAS DEL DIA MIERCOLES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Jueves": {
+                    titulo: "Jueves",
+                    texto: "TAREAS DEL DIA JUEVES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                },
+                "Viernes": {
+                    titulo: "Viernes",
+                    texto: "TAREAS DEL DIA VIERNES.",
+                    gruposDeImagenes: [
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200'],
+                        ['https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200', 'https://placeholder.com/200']
+                    ]
+                }
+            }
+        };
+
+
+
+        // Referencias a elementos
+        const mainContent = document.getElementById('main-content');
+        const diasView = document.getElementById('dias-view');
+        const selector = document.getElementById('selector');
+        const forms = document.getElementById('forms');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const seleccionaDiaMensaje = document.getElementById('selecciona-dia-mensaje');
+        const contenidoDiaDisplay = document.getElementById('contenido-dia-display');
+        const contenidoCentralWrapper = document.getElementById('contenido-central-wrapper');
+        const printButtonsContainer = document.getElementById('print-buttons-container');
+        const diasContainer = document.getElementById('dias-container');
+
+        // Referencias a la ventana emergente
+        const imageModal = document.getElementById('image-modal');
+        const closeModalButton = document.querySelector('.close-button');
+        const printModalButton = document.getElementById('print-modal-button');
+        const modalTitle = document.getElementById('modal-title');
+        const modalImagesContainer = document.querySelector('.modal-images-container');
+
+        // Referencias a botones y campos
+        const btnLogin = document.getElementById('btn-login');
+        const btnRegister = document.getElementById('btn-register');
+        const backLogin = document.getElementById('back-login');
+        const backRegister = document.getElementById('back-register');
+        const backDias = document.getElementById('back-dias');
+
+        const nivelButtons = document.querySelectorAll('.nivel-btn');
+        const diaButtons = document.querySelectorAll('.dias-header .boton-amarillo');
+
+        const loginUsuarioInput = document.getElementById('loginUsuario');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginMensaje = document.getElementById('loginMensaje');
+
+
+        // Elementos para mostrar el contenido del día
+        const diaTitulo = document.getElementById('dia-titulo');
+        const diaTexto = document.getElementById('dia-texto');
+
+        // Lógica de navegación principal
+        btnLogin.addEventListener('click', () => {
+            selector.classList.add('hidden');
+            forms.classList.remove('hidden');
+            loginForm.style.display = 'flex';
+            registerForm.style.display = 'none';
+            loginForm.reset();
+            loginMensaje.textContent = '';
+        });
+
+        btnRegister.addEventListener('click', () => {
+            selector.classList.add('hidden');
+            forms.classList.remove('hidden');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'flex';
+            registerForm.reset();
+        });
+
+        backLogin.addEventListener('click', () => {
+            forms.classList.add('hidden');
+            selector.classList.remove('hidden');
+        });
+
+        backRegister.addEventListener('click', () => {
+            forms.classList.add('hidden');
+            selector.classList.remove('hidden');
+        });
+
+        backDias.addEventListener('click', () => {
+            diasContainer.classList.add('hidden');
+            seleccionaDiaMensaje.classList.remove('hidden');
+            contenidoDiaDisplay.classList.add('hidden');
+            document.querySelector('#dias-view h1').textContent = 'Elige un Nivel';
+            document.querySelector('.niveles-header').classList.remove('hidden');
+        });
+
+        // Función para mostrar la vista de los días de la semana
+        function showDiasView() {
+            mainContent.classList.add('hidden');
+            diasView.classList.remove('hidden');
+            diasContainer.classList.add('hidden'); // Oculta el contenedor de días al entrar
+        }
+
+        // Manejador de clic en los botones de nivel
+        nivelButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const nivel = button.dataset.nivel;
+                selectedLevel = nivel;
+                console.log(`Seleccionaste el Nivel ${nivel}`);
+
+                // Ocultar los botones de nivel y mostrar el contenedor de días
+                document.querySelector('.niveles-header').classList.add('hidden');
+                document.querySelector('#dias-view h1').textContent = 'Elige un Día';
+                diasContainer.classList.remove('hidden');
+
+                // Reinicia la vista del día seleccionado
+                seleccionaDiaMensaje.classList.remove('hidden');
+                contenidoDiaDisplay.classList.add('hidden');
+
+                // Desactiva los botones de día para que no queden activos de la última vez
+                diaButtons.forEach(btn => btn.classList.remove('active'));
+            });
+        });
+
+        // Lógica del formulario de inicio de sesión
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const usuario = loginUsuarioInput.value;
+            const password = loginPasswordInput.value;
+
+            // Se eliminó la validación
+            loginMensaje.textContent = 'Inicio de sesión exitoso.';
+            loginMensaje.classList.remove('error');
+            setTimeout(() => {
+                forms.classList.add('hidden');
+                diasView.classList.remove('hidden');
+                loginMensaje.textContent = '';
+            }, 1000);
+        });
+
+        // Carga el contenido del día seleccionado
+        diaButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Quitar la clase 'active' de todos los botones
+                diaButtons.forEach(btn => btn.classList.remove('active'));
+                // Añadir la clase 'active' al botón clickeado
+                button.classList.add('active');
+
+                const dia = button.dataset.dia;
+
+                // Accede a los datos usando el nivel seleccionado
+                if (selectedLevel && contenidoPorNivel[selectedLevel] && contenidoPorNivel[selectedLevel][dia]) {
+                    const contenido = contenidoPorNivel[selectedLevel][dia];
+
+                    diaTitulo.textContent = contenido.titulo;
+                    diaTexto.textContent = contenido.texto;
+                    printButtonsContainer.innerHTML = '';
+
+                    contenido.gruposDeImagenes.forEach((grupo, index) => {
+                        const printBtn = document.createElement('button');
+                        printBtn.className = 'print-button';
+                        printBtn.textContent = `Imprimir Tarea ${index + 1}`;
+                        printBtn.addEventListener('click', () => {
+                            openModalAndPrint(`Tarea del ${contenido.titulo} - ${index + 1}`, grupo);
+                        });
+                        printButtonsContainer.appendChild(printBtn);
+                    });
+
+                    seleccionaDiaMensaje.classList.add('hidden');
+                    contenidoDiaDisplay.classList.remove('hidden');
+                } else {
+                    // Manejar el caso de que no haya contenido para ese nivel/día
+                    diaTitulo.textContent = "Contenido no disponible";
+                    diaTexto.textContent = "Lo sentimos, no hay tareas para este día y nivel.";
+                    printButtonsContainer.innerHTML = '';
+                    seleccionaDiaMensaje.classList.add('hidden');
+                    contenidoDiaDisplay.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Lógica del modal
+        function openModalAndPrint(title, images) {
+            modalTitle.textContent = title;
+            modalImagesContainer.innerHTML = '';
+            const imagesToPrint = images;
+
+            imagesToPrint.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                modalImagesContainer.appendChild(img);
+            });
+
+            imageModal.style.display = 'flex';
+        }
+
+        closeModalButton.addEventListener('click', () => {
+            imageModal.style.display = 'none';
+        });
+
+        printModalButton.addEventListener('click', () => {
+            window.print();
+        });
+
+        // Cierra el modal al hacer clic fuera de su contenido
+        window.addEventListener('click', (event) => {
+            if (event.target === imageModal) {
+                imageModal.style.display = 'none';
+            }
+        });
+    </script>
+
+</body>
+
+</html>
